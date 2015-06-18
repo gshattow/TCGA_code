@@ -85,15 +85,9 @@ class ReadData :
 		patientfile = 'patients.txt'
 		np.savetxt(patientfile, patients_all, delimiter='\n', fmt = '%s')
 
-		cancer_mutation_count = np.sum(cancer, axis = 1)
-		print cancer_mutation_count
-
-		adjacent_mutation_count = np.sum(adjacent, axis = 1)
-		# print adjacent_mutation_count
-		print sum(adjacent_mutation_count)
 
 
-		return n_p, n_g, cancer_mutation_count, adjacent_mutation_count
+		return  patients_all, genes_all, cancer, adjacent
 
 
 
@@ -157,7 +151,17 @@ if __name__ == '__main__':
 	rd = ReadData()
 	pd = PlotData()
 
-	n_p, n_g, cancer_mutation_count, adjacent_mutation_count = rd.read_genes(datafile)
+	patients_all, genes_all, cancer, adjacent = rd.read_genes(datafile)
+	
+	cancer_mutation_count = np.sum(cancer, axis = 1)
+	print cancer_mutation_count
+
+	adjacent_mutation_count = np.sum(adjacent, axis = 1)
+	# print adjacent_mutation_count
+	print sum(adjacent_mutation_count)
+
+	n_p = len(patients_all)
+	n_g = len(patients_all)
 	
 	pd.N_mutations_per_patient(n_p, n_g, cancer_mutation_count, adjacent_mutation_count)
 	pd.N_patients_with_N_mutations(cancer_mutation_count)
