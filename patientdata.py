@@ -138,6 +138,35 @@ class Results :
 		print network.shape
 		return network
 
+
+	def threept_Cross_Correlation(self, N, cancer) :
+
+
+		# populate an array with gene pairs for each patient
+		# i.e. if a patient has mutations in genes 1, 3 and 5
+		# we add 1 to network[1,3,5]
+
+		tic = time.clock()
+		network = np.zeros((N,N,N))
+		print len(cancer)
+		for pp in range(len(cancer)) :	
+			ww = np.where(cancer[pp] > 0)[0]	
+			for trio in itertools.combinations(ww, 3):
+				network[trio[0], trio[1], trio[2]] = \
+					network[trio[0], trio[1], trio[2]] + 1
+
+		toc = time.clock()
+		print toc - tic
+		
+		print network.shape
+		
+		ww = np.where(network > 1)
+		print len(ww[0]), 'triplets are found in more than 1 patient'
+		
+		return network
+
+
+
 class PlotData :
 	def N_mutations_per_patient(self, n_p, n_g, cancer_mutation_count, adjacent_mutation_count) :
 		fig = plt.figure(figsize=(10, 3))
@@ -193,8 +222,9 @@ class PlotData :
 	def Network(self, min_pairs, network, mutations_per_gene, chromosomes) :
 	
 		tic1 = time.clock()
-		fig = plt.figure(figsize=(10, 9))
+		fig = plt.figure(frameon=False, figsize=(10, 9))
 		ax = fig.add_subplot(111)
+
 		plt.axis([-1.1,1.1,-1.1,1.1])
 		ax.set_xticklabels([])
 		ax.set_yticklabels([])
@@ -206,22 +236,38 @@ class PlotData :
 #		print network[np.where(network > min_pairs-1)]
 		
 		uniq_genes = list(set(np.ravel(ww)))
+		uniq_genes.sort()
+		gene_names = np.array(genes_all)
 		print len(uniq_genes), 'genes are involved in the pairs'
 		N_genes = len(uniq_genes)
+		for ii in range(N_genes) :
+			print gene_names[uniq_genes][ii], mutations_per_gene[uniq_genes][ii]
 		
 		theta = 2*np.pi*np.linspace(0, 1, N_genes)
 		r = 1. 
 		x = r*np.sin(theta)
 		y = r*np.cos(theta)
+		x1 = (r + 0.05)*np.sin(theta)
+		y1 = (r + 0.05)*np.cos(theta)
 		colors = chromosomes[uniq_genes]/23.
-		area = mutations_per_gene[uniq_genes]
+		area = (mutations_per_gene[uniq_genes]/2.)**1.5
 		print 'max area:', np.max(area)
 
-
-		print area
+		print uniq_genes
+		mut1 = mutations_per_gene[uniq_genes]
+		print mut1
+		big_mut_index = np.where(mut1 > 29)[0]
+		print big_mut_index
+		uniq_genes_arr = np.array(uniq_genes)
+		labeled_genes = uniq_genes_arr[big_mut_index]
+		print labeled_genes
+		print gene_names[labeled_genes]
 	
 		tic = time.clock()
-		plt.scatter(x, y, s=area, c=colors, alpha=0.5)
+		plt.scatter(x, y, s=area, c=colors, alpha=0.8, edgecolor = colors)
+		for ll in labeled_genes :
+			l1 = uniq_genes.index(ll)
+			ax.annotate(gene_names[ll], xy = (x1[l1], y1[l1]), xycoords='data')
 		for gg in range(N_pairs):
 			g1 = uniq_genes.index(ww[0][gg])
 			g2 = uniq_genes.index(ww[1][gg])
@@ -272,11 +318,12 @@ if __name__ == '__main__':
 	n_g = len(genes_all)
 	
 	N = n_g
-	network = res.Cross_Correlation(N, cancer)
+	network2D = res.Cross_Correlation(N, cancer)
+#	network3D = res.threept_Cross_Correlation(N, cancer)
 	
 #	pd.N_mutations_per_patient(n_p, n_g, cancer_mutation_count, adjacent_mutation_count)
 #	pd.N_patients_with_N_mutations(cancer_mutation_count)
 
 	min_pairs = 4
-	pd.Network(min_pairs, network, mutations_per_gene, chromosomes)
+	pd.Network(min_pairs, network2D, mutations_per_gene, chromosomes)
 #	pd.Network_by_chromosome(cancer, chromosomes)
