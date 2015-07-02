@@ -32,24 +32,17 @@ class ReadData :
 		for item in file(datafile) :
 			ii = ii + 1
 			if item.startswith('##'):
-#				print ii
 				continue
 			elif item.startswith('#') :
 				print 'line number', ii, 'has the index names'
 				item = item.split()
 				location_index = item.index('Location')
 				extra_index = item.index('Extra')
-#			if not item.startswith('#') :
 			else :
-#				print ii
 				item = item.split()
 				loc = item[location_index].split(':')
-#				chromosomes.append(loc[0])
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-#				print extra
 				if set(['SYMBOL', 'IND']) <= set(extra) :
-#				if 'SYMBOL' and 'IND' in extra :
-# 					print ii, len(extra), extra
 					if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
 						gene_index = extra.index('SYMBOL') + 1
 						patient_index = extra.index('IND')  + 1
@@ -66,14 +59,14 @@ class ReadData :
 		genes_all = list(set(genes_all))
 		patients_all = list(set(patients_all))
 		
-		print len(genes_all)
-		print len(patients_all)
+		print len(genes_all), 'unique genes'
+		print len(patients_all), 'unique patients'
 
 		n_g = len(genes_all)
 		n_p = len(patients_all)
 		
-		print genes_all
-		print patients_all
+#		print genes_all
+#		print patients_all
 
 ############################################################
 
