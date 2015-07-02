@@ -50,11 +50,11 @@ class ReadData :
 				if set(['SYMBOL', 'IND']) <= set(extra) :
 #				if 'SYMBOL' and 'IND' in extra :
 # 					print ii, len(extra), extra
-#				if (is_gene) :
-					gene_index = extra.index('SYMBOL') + 1
-					patient_index = extra.index('IND')  + 1
-					genes_all.append(extra[gene_index])
-					patients_all.append(extra[patient_index])
+					if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
+						gene_index = extra.index('SYMBOL') + 1
+						patient_index = extra.index('IND')  + 1
+						genes_all.append(extra[gene_index])
+						patients_all.append(extra[patient_index])
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
