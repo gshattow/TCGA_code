@@ -26,12 +26,6 @@ class ReadData :
 		outfile = params.outfile
 		ignore_consequence = params.ignore_consequence
 		impact = params.impact
-# 		for item in file(parfile) :
-# 			item = item.split()
-# 			if item[0] == 'datafile' : datafile = item[1]
-# 			if item[0] == 'outfile' : outfile = item[1]
-# 			if item[0] == 'ignore_consequence' : ignore_consequence = item[1]
-# 			if item[0] == 'impact' : impact = item[1]
 			
 		print datafile, outfile
 		return datafile, outfile, ignore_consequence, impact
@@ -125,10 +119,30 @@ class ReadData :
 		print toc - tic, 'seconds to read in file, ', \
 			float(len(genes_list))/(toc-tic), 'per second'		
 			
-		print mutation_array
+#		print mutation_array
 		
 		return mutation_array
+
+class Analyze :
+	def patient_pairs(self, mutation_array) :
 		
+		print mutation_array.shape
+		n_p = (mutation_array.shape)[0]
+		n_g = (mutation_array.shape)[1]
+		print n_p, n_g
+		
+		n_pairs = int(n_p/2)
+		print n_pairs, 'unique pairs of patients'
+		pairs_overlap = np.zeros(n_pairs)
+		
+		for pp in range(n_pairs) :
+			array1 = mutation_array[2*pp]
+			array2 = mutation_array[2*pp + 1]
+			pair_array = array1 * array2
+			pairs_overlap[pp] = np.sum(pair_array)
+
+		print pairs_overlap		
+
 class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
 
@@ -146,12 +160,15 @@ class WriteData :
 
 if __name__ == '__main__':
 	rd = ReadData()
+	az = Analyze()
 	wt = WriteData()
 
 	datafile, outfile, ignore_consequence, impact = rd.read_parameters(parfile)
 	
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
+
+	az.patient_pairs(mutation_array)
 
 	wt.write_mutation_array(mutation_array, outfile)
 	wt.write_patients(patients_list)
