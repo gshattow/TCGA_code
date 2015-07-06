@@ -148,6 +148,30 @@ class Analyze :
 
 		print 'overlapping pairs', pairs_overlap		
 
+
+		print np.min(pairs_overlap), np.max(pairs_overlap)
+		nbins = int(np.max(pairs_overlap))
+		bin_centres = np.linspace(0.5, nbins - 0.5, nbins)
+		bin_edges = np.linspace(0, nbins, nbins + 1)
+
+
+		fig = plt.figure(frameon=False, figsize=(10, 9))
+		ax = fig.add_subplot(111)
+
+		hists = []
+		for run in range(n_runs) :
+			h, edges = np.histogram(pairs_overlap, bins = bin_edges)
+			ax.plot(bin_centres, h)
+
+		plt.xlabel('Overlapping Gene Mutations')
+		plt.ylabel('frequency')
+
+		outputFile = 'plots/' + 'pair_distribution' + OutputFormat
+		plt.savefig(outputFile)  
+		print 'Saved file to', outputFile
+		plt.close()
+
+
 class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
 
