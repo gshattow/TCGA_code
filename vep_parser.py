@@ -14,6 +14,8 @@ OutputFormat = '.png'
 parfile = 'parameters.par'
 datafile = ''
 outfile = ''
+ignore_consequence = ''
+impact = ''
 
 
 class ReadData :
@@ -22,6 +24,8 @@ class ReadData :
 			item = item.split()
 			if item[0] == 'datafile' : datafile = item[1]
 			if item[0] == 'outfile' : outfile = item[1]
+			if item[0] == 'ignore_consequence' : ignore_consequence = item[1]
+			if item[0] == 'impact' : impact = item[1]
 			
 		print datafile, outfile
 		return datafile, outfile
@@ -56,13 +60,12 @@ class ReadData :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if item[consequence_index] != 'downstream_gene_variant' :
-					if set(['SYMBOL', 'IND']) <= set(extra) :
-						if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') :
-							gene_index = extra.index('SYMBOL') + 1
-							patient_index = extra.index('IND')  + 1
-							genes_all.append(extra[gene_index])
-							patients_all.append(extra[patient_index])
+				if set(['SYMBOL', 'IND']) <= set(extra) :
+					if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') :
+						gene_index = extra.index('SYMBOL') + 1
+						patient_index = extra.index('IND')  + 1
+						genes_all.append(extra[gene_index])
+						patients_all.append(extra[patient_index])
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
@@ -102,10 +105,10 @@ class ReadData :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if item[consequence_index] != 'downstream_gene_variant' :
+				if item[consequence_index] != ignore_consequence :
 					if set(['SYMBOL', 'IND']) <= set(extra) :
 						if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') & \
-							(extra[extra.index('IMPACT') + 1] == 'HIGH') :
+							(extra[extra.index('IMPACT') + 1] == impact) :
 							gene_index = extra.index('SYMBOL') + 1
 							patient_index = extra.index('IND')  + 1
 							ii_p = patients_list.index(extra[patient_index])
