@@ -8,6 +8,7 @@ from scipy import stats
 import itertools
 import time
 import params
+from random import sample
 
 
 plot_dir = 'plots/'
@@ -126,6 +127,7 @@ class ReadData :
 class Analyze :
 	def patient_pairs(self, mutation_array) :
 		
+		n_runs = 10
 		print mutation_array.shape
 		n_p = (mutation_array.shape)[0]
 		n_g = (mutation_array.shape)[1]
@@ -133,15 +135,18 @@ class Analyze :
 		
 		n_pairs = int(n_p/2)
 		print n_pairs, 'unique pairs of patients'
-		pairs_overlap = np.zeros(n_pairs)
+		pairs_overlap = np.zeros((n_runs, n_pairs))
 		
-		for pp in range(n_pairs) :
-			array1 = mutation_array[2*pp]
-			array2 = mutation_array[2*pp + 1]
-			pair_array = array1 * array2
-			pairs_overlap[pp] = np.sum(pair_array)
+		list_p = np.linspace(0, n_p - 1, n_p)
+		for run in range(n_runs) :
+			randomized_list = sample(list_p, n_p)
+			for pp in range(n_pairs) :
+				array1 = mutation_array[randomized_list[2*pp]]
+				array2 = mutation_array[randomized_list[2*pp + 1]]
+				pair_array = array1 * array2
+				pairs_overlap[run][pp] = np.sum(pair_array)
 
-		print pairs_overlap		
+		print 'overlapping pairs', pairs_overlap		
 
 class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
