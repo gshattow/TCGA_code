@@ -15,7 +15,7 @@ datafile = '50000_variant_effect_output.txt'
 
 
 class ReadData :
-	def read_vep_file(self, datafile) :
+	def parse_vep_file(self, datafile) :
 		genes_all = []
 		patients_all = []
 
@@ -23,6 +23,7 @@ class ReadData :
 		extra_index = 0
 		gene_index = 0
 		patient_index = 0
+		consequence_index = 0
 		genes_all = []
 		patients_all = []
 		chromosomes = []
@@ -36,18 +37,20 @@ class ReadData :
 			elif item.startswith('#') :
 				print 'line number', ii, 'has the index names'
 				item = item.split()
+				consequence_index = item.index('Consequence')
 				location_index = item.index('Location')
 				extra_index = item.index('Extra')
 			else :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if set(['SYMBOL', 'IND']) <= set(extra) :
-					if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
-						gene_index = extra.index('SYMBOL') + 1
-						patient_index = extra.index('IND')  + 1
-						genes_all.append(extra[gene_index])
-						patients_all.append(extra[patient_index])
+				if item[consequence_index] != 'downstream_gene_variant' :
+					if set(['SYMBOL', 'IND']) <= set(extra) :
+						if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
+							gene_index = extra.index('SYMBOL') + 1
+							patient_index = extra.index('IND')  + 1
+							genes_all.append(extra[gene_index])
+							patients_all.append(extra[patient_index])
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
@@ -62,11 +65,47 @@ class ReadData :
 		print len(genes_all), 'unique genes'
 		print len(patients_all), 'unique patients'
 
-		n_g = len(genes_all)
-		n_p = len(patients_all)
 		
 #		print genes_all
 #		print patients_all
+		
+		return patients_all, genes_all
+		
+	def sort_vep_file(self, datafile, patients_list, genes_list) :
+		
+		n_g = len(genes_list)
+		n_p = len(patients_list)
+		mutation_array = np.zeros((n_p, n_g))
+		
+		tic = time.clock()
+		for item in file(datafile) :
+			if item.startswith('##'):
+				continue
+			elif item.startswith('#') :
+				item = item.split()
+				consequence_index = item.index('Consequence')
+				location_index = item.index('Location')
+				extra_index = item.index('Extra')
+			else :
+				item = item.split()
+				loc = item[location_index].split(':')
+				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
+				if item[consequence_index] != 'downstream_gene_variant' :
+					if set(['SYMBOL', 'IND']) <= set(extra) :
+						if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
+							gene_index = extra.index('SYMBOL') + 1
+							patient_index = extra.index('IND')  + 1
+							ii_p = patients_list.index(extra[patient_index])
+							ii_g = genes_list.index(extra[gene_index])
+							mutation_array[ii_p][ii_g] += 1
+
+		toc = time.clock()	
+		print toc - tic, 'seconds to read in file, ', \
+			float(len(genes_list))/(toc-tic), 'per second'		
+			
+		print mutation_array
+		
+		
 
 ############################################################
 
@@ -74,4 +113,6 @@ class ReadData :
 
 if __name__ == '__main__':
 	rd = ReadData()
-	rd.read_vep_file(datafile)
+	patients_list, genes_list = rd.parse_vep_file(datafile)
+	
+	rd.sort_vep_file(datafile, patients_list, genes_list)
