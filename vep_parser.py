@@ -46,7 +46,7 @@ class ReadData :
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
 				if item[consequence_index] != 'downstream_gene_variant' :
 					if set(['SYMBOL', 'IND']) <= set(extra) :
-						if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
+						if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') :
 							gene_index = extra.index('SYMBOL') + 1
 							patient_index = extra.index('IND')  + 1
 							genes_all.append(extra[gene_index])
@@ -92,7 +92,8 @@ class ReadData :
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
 				if item[consequence_index] != 'downstream_gene_variant' :
 					if set(['SYMBOL', 'IND']) <= set(extra) :
-						if extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC' :
+						if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') & \
+							(extra[extra.index('IMPACT') + 1] == 'HIGH') :
 							gene_index = extra.index('SYMBOL') + 1
 							patient_index = extra.index('IND')  + 1
 							ii_p = patients_list.index(extra[patient_index])
