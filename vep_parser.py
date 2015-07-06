@@ -105,7 +105,12 @@ class ReadData :
 			
 		print mutation_array
 		
+		return mutation_array
 		
+class WriteData :
+	def write_mutation_array(self, mutation_array, outfile) :
+
+		np.savetxt('output.dat', mutation_array, fmt = '%i')
 
 ############################################################
 
@@ -113,6 +118,8 @@ class ReadData :
 
 if __name__ == '__main__':
 	rd = ReadData()
+	wt = WriteData()
 	patients_list, genes_list = rd.parse_vep_file(datafile)
-	
-	rd.sort_vep_file(datafile, patients_list, genes_list)
+	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
+
+	wt.write_mutation_array(mutation_array, 'outfile.txt')
