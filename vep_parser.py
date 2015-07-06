@@ -7,6 +7,7 @@ from matplotlib.ticker import MaxNLocator
 from scipy import stats
 import itertools
 import time
+import params
 
 
 plot_dir = 'plots/'
@@ -20,12 +21,17 @@ impact = ''
 
 class ReadData :
 	def read_parameters(self, parfile) :
-		for item in file(parfile) :
-			item = item.split()
-			if item[0] == 'datafile' : datafile = item[1]
-			if item[0] == 'outfile' : outfile = item[1]
-			if item[0] == 'ignore_consequence' : ignore_consequence = item[1]
-			if item[0] == 'impact' : impact = item[1]
+	
+		datafile = params.datafile
+		outfile = params.outfile
+		ignore_consequence = params.ignore_consequence
+		impact = params.impact
+# 		for item in file(parfile) :
+# 			item = item.split()
+# 			if item[0] == 'datafile' : datafile = item[1]
+# 			if item[0] == 'outfile' : outfile = item[1]
+# 			if item[0] == 'ignore_consequence' : ignore_consequence = item[1]
+# 			if item[0] == 'impact' : impact = item[1]
 			
 		print datafile, outfile
 		return datafile, outfile, ignore_consequence, impact
@@ -127,6 +133,12 @@ class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
 
 		np.savetxt(outfile, mutation_array, fmt = '%i')
+		
+	def write_patients(self, patients_list) :
+		np.savetxt('patients.txt', patients_list, fmt = '%s')
+
+	def write_genes(self, genes_list) :
+		np.savetxt('genes.txt', genes_list, fmt = '%s')
 
 ############################################################
 
@@ -142,3 +154,5 @@ if __name__ == '__main__':
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
 	wt.write_mutation_array(mutation_array, outfile)
+	wt.write_patients(patients_list)
+	wt.write_genes(genes_list)
