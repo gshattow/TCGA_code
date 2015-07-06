@@ -11,10 +11,22 @@ import time
 
 plot_dir = 'plots/'
 OutputFormat = '.png'
-datafile = '50000_variant_effect_output.txt'
+parfile = 'parameters.par'
+datafile = ''
+outfile = ''
 
 
 class ReadData :
+	def read_parameters(self, parfile) :
+		for item in file(parfile) :
+			item = item.split()
+			if item[0] == 'datafile' : datafile = item[1]
+			if item[0] == 'outfile' : outfile = item[1]
+			
+		print datafile, outfile
+		return datafile, outfile
+		
+		
 	def parse_vep_file(self, datafile) :
 		genes_all = []
 		patients_all = []
@@ -111,7 +123,7 @@ class ReadData :
 class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
 
-		np.savetxt('output.dat', mutation_array, fmt = '%i')
+		np.savetxt(outfile, mutation_array, fmt = '%i')
 
 ############################################################
 
@@ -120,7 +132,9 @@ class WriteData :
 if __name__ == '__main__':
 	rd = ReadData()
 	wt = WriteData()
+
+	datafile, outfile = rd.read_parameters(parfile)
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
-	wt.write_mutation_array(mutation_array, 'outfile.txt')
+	wt.write_mutation_array(mutation_array, outfile)
