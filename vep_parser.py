@@ -147,29 +147,8 @@ class Analyze :
 				pairs_overlap[run][pp] = np.sum(pair_array)
 
 		print 'overlapping pairs', pairs_overlap		
-
-
-		print np.min(pairs_overlap), np.max(pairs_overlap)
-		nbins = int(np.max(pairs_overlap))
-		bin_centres = np.linspace(0.5, nbins - 0.5, nbins)
-		bin_edges = np.linspace(0, nbins, nbins + 1)
-
-
-		fig = plt.figure(frameon=False, figsize=(10, 9))
-		ax = fig.add_subplot(111)
-
-		hists = []
-		for run in range(n_runs) :
-			h, edges = np.histogram(pairs_overlap, bins = bin_edges)
-			ax.plot(bin_centres, h)
-
-		plt.xlabel('Overlapping Gene Mutations')
-		plt.ylabel('frequency')
-
-		outputFile = 'plots/' + 'pair_distribution' + OutputFormat
-		plt.savefig(outputFile)  
-		print 'Saved file to', outputFile
-		plt.close()
+		
+		return pairs_overlap
 
 
 class WriteData :
@@ -182,6 +161,9 @@ class WriteData :
 
 	def write_genes(self, genes_list) :
 		np.savetxt('genes.txt', genes_list, fmt = '%s')
+		
+	def write_pairs_overlap(self, pairs_overlap) :
+		np.savetxt('pairs_overlap.txt', pairs_overlap, fmt = '%i')
 
 ############################################################
 
@@ -197,8 +179,9 @@ if __name__ == '__main__':
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
-	az.patient_pairs(mutation_array)
+	pairs_overlap = az.patient_pairs(mutation_array)
 
 	wt.write_mutation_array(mutation_array, outfile)
 	wt.write_patients(patients_list)
 	wt.write_genes(genes_list)
+	wt.write_pairs_overlap(pairs_overlap)
