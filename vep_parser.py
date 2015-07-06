@@ -28,7 +28,7 @@ class ReadData :
 			if item[0] == 'impact' : impact = item[1]
 			
 		print datafile, outfile
-		return datafile, outfile
+		return datafile, outfile, ignore_consequence, impact
 		
 		
 	def parse_vep_file(self, datafile) :
@@ -136,7 +136,8 @@ if __name__ == '__main__':
 	rd = ReadData()
 	wt = WriteData()
 
-	datafile, outfile = rd.read_parameters(parfile)
+	datafile, outfile, ignore_consequence, impact = rd.read_parameters(parfile)
+	
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
