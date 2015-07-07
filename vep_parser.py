@@ -13,26 +13,16 @@ from random import sample
 
 plot_dir = 'plots/'
 OutputFormat = '.png'
-parfile = 'parameters.par'
 datafile = ''
 outfile = ''
 ignore_consequence = ''
 impact = ''
 
 
-class ReadData :
-	def read_parameters(self, parfile) :
-	
-		datafile = params.datafile
-		outfile = params.outfile
-		ignore_consequence = params.ignore_consequence
-		impact = params.impact
-			
-		print datafile, outfile
-		return datafile, outfile, ignore_consequence, impact
-		
+class ReadData :		
 		
 	def parse_vep_file(self, datafile) :
+
 		genes_all = []
 		patients_all = []
 
@@ -62,7 +52,7 @@ class ReadData :
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
 				if set(['SYMBOL', 'IND']) <= set(extra) :
-					if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') :
+					if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
 						gene_index = extra.index('SYMBOL') + 1
 						patient_index = extra.index('IND')  + 1
 						genes_all.append(extra[gene_index])
@@ -106,10 +96,10 @@ class ReadData :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if item[consequence_index] != ignore_consequence :
+				if item[consequence_index] != params.ignore_consequence :
 					if set(['SYMBOL', 'IND']) <= set(extra) :
-						if (extra[extra.index('SYMBOL_SOURCE') + 1] == 'HGNC') & \
-							(extra[extra.index('IMPACT') + 1] == impact) :
+						if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) & \
+							(extra[extra.index('IMPACT') + 1] == params.impact) :
 							gene_index = extra.index('SYMBOL') + 1
 							patient_index = extra.index('IND')  + 1
 							ii_p = patients_list.index(extra[patient_index])
@@ -124,15 +114,17 @@ class ReadData :
 		
 		return mutation_array
 
-class Analyze :
+class Results :
 	def patient_pairs(self, mutation_array) :
 		
-		n_runs = 10
+		n_runs = 100
 		print mutation_array.shape
 		n_p = (mutation_array.shape)[0]
 		n_g = (mutation_array.shape)[1]
 		print n_p, n_g
 		
+		b_mutation_array = np.where(mutation_array > 0, 1., 0,)
+		print b_mutation_array
 		n_pairs = int(n_p/2)
 		print n_pairs, 'unique pairs of patients'
 		pairs_overlap = np.zeros((n_runs, n_pairs))
@@ -141,29 +133,62 @@ class Analyze :
 		for run in range(n_runs) :
 			randomized_list = sample(list_p, n_p)
 			for pp in range(n_pairs) :
-				array1 = mutation_array[randomized_list[2*pp]]
-				array2 = mutation_array[randomized_list[2*pp + 1]]
+				array1 = b_mutation_array[randomized_list[2*pp]]
+				array2 = b_mutation_array[randomized_list[2*pp + 1]]
 				pair_array = array1 * array2
+				pair_array = pair_array[np.where(pair_array > 0, 1, 0)]
 				pairs_overlap[run][pp] = np.sum(pair_array)
 
-		print 'overlapping pairs', pairs_overlap		
+#		print 'overlapping pairs', pairs_overlap		
 		
 		return pairs_overlap
+
+	def gene_pairs(self, mutation_array) :
+
+		n_p = (mutation_array.shape)[0]
+		n_g = (mutation_array.shape)[1]
+
+		# populate an array with gene pairs for each patient
+		# i.e. if a patient has mutations in genes 1 and 3
+		# we add 1 to network[1,3]
+
+		tic = time.clock()
+		gene_pair_array = np.zeros((n_g,n_g))
+		print len(mutation_array)
+		for pp in range(n_p) :	
+			ww = np.where(mutation_array[pp] > 0)[0]	
+			for pair in itertools.combinations(ww, 2):
+				gene_pair_array[pair[0], pair[1]] += 1
+
+		toc = time.clock()
+		print toc - tic
+		
+		print gene_pair_array.shape
+		
+		print gene_pair_array
+		return gene_pair_array
 
 
 class WriteData :
 	def write_mutation_array(self, mutation_array, outfile) :
-
+		file = 'mutation_array_' + params.chrom + '_' + params.impact + '.dat'
 		np.savetxt(outfile, mutation_array, fmt = '%i')
 		
 	def write_patients(self, patients_list) :
-		np.savetxt('patients.txt', patients_list, fmt = '%s')
+		file = 'patients_' + params.chrom + '_' + params.impact + '.txt'
+		np.savetxt(file, patients_list, fmt = '%s')
 
 	def write_genes(self, genes_list) :
-		np.savetxt('genes.txt', genes_list, fmt = '%s')
+		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
+		np.savetxt(file, genes_list, fmt = '%s')
 		
 	def write_pairs_overlap(self, pairs_overlap) :
-		np.savetxt('pairs_overlap.txt', pairs_overlap, fmt = '%i')
+		file = 'patient_pairs_overlap_' + params.chrom + '_' + params.impact + '.txt'
+		np.savetxt(file, pairs_overlap, fmt = '%i')
+
+	def write_gene_pairs(self, gene_pair_array) :
+		file = 'gene_pairs_' + params.chrom + '_' + params.impact + '.txt'
+		np.savetxt(file, gene_pair_array, fmt = '%i')
 
 ############################################################
 
@@ -171,17 +196,19 @@ class WriteData :
 
 if __name__ == '__main__':
 	rd = ReadData()
-	az = Analyze()
+	res = Results()
 	wt = WriteData()
 
-	datafile, outfile, ignore_consequence, impact = rd.read_parameters(parfile)
 	
+	datafile = params.datafile + params.chrom
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
-	pairs_overlap = az.patient_pairs(mutation_array)
+	pairs_overlap = res.patient_pairs(mutation_array)
+	gene_pair_array = res.gene_pairs(mutation_array)
 
 	wt.write_mutation_array(mutation_array, outfile)
 	wt.write_patients(patients_list)
 	wt.write_genes(genes_list)
 	wt.write_pairs_overlap(pairs_overlap)
+	wt.write_gene_pairs(gene_pair_array)
