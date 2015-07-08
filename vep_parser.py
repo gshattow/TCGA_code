@@ -68,8 +68,7 @@ class ReadData :
 		genes_all = list(set(genes_all))
 		patients_all = list(set(patients_all))
 		
-		print len(genes_all), 'unique genes'
-		print len(patients_all), 'unique patients'
+		print len(genes_all), 'intragenic mutations read'
 
 		
 #		print genes_all
