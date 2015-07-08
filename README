@@ -1,0 +1,17 @@
+You should have a file in the directory where you are running vep_parser.py and figures_vep.py called params.py.
+
+
+It should look like this:
+
+params.py
+
+## chrom = chromosome
+## datafile = input file name prefix
+## ignore_consequence = consequence to ignore. Currently takes only one value
+## catalogue = catalogue which gene names are taken from
+
+chrom = '1'
+datafile = 'output_'
+ignore_consequence = 'downstream_gene_variant'
+impact = 'MODIFIER'
+catalogue = 'HGNC'
