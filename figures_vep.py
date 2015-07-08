@@ -10,7 +10,7 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 
 font = {'family':'serif',
-	'size':20	}
+	'size':14	}
 plt.rc('font', **font)
 
 
@@ -45,6 +45,10 @@ class PlotData :
 		bin_centres = np.linspace(0, nbins, nbins)
 		bin_edges = np.linspace(-0.5, nbins + 0.5, nbins + 1)
 
+		gene_list = []
+		for item in file('genes_' + chrom + '_' + impact + '.txt') :
+			gene_list.append(item.split()[0])
+
 
 		fig = plt.figure(frameon=False, figsize=(10, 9))
 		ax = fig.add_subplot(111)
@@ -58,8 +62,10 @@ class PlotData :
 
 		plt.xlabel('Number of overlapping gene mutations', fontsize = 24)
 		plt.ylabel(r'frequency', fontsize = 28)
-		plt.text(max_p, max_h, str(n_runs) + ' runs\n' + 'chromosome ' + chrom, 
-			fontsize = 30, verticalalignment='top', horizontalalignment='right')
+		text1 = str(len(gene_list)) + ' genes\n' + 'impact ' + \
+			impact + '\n chromosome ' + chrom
+		plt.text(max_p, max_h, text1, fontsize = 24, 
+			verticalalignment='top', horizontalalignment='right')
 
 		outputFile = 'plots/' + 'pair_distribution_' + chrom + '_' + impact + OutputFormat
 		plt.savefig(outputFile)  
@@ -82,12 +88,12 @@ class PlotData :
 		gene_pairs = np.transpose(gene_pairs)
 
 		fig = plt.figure(frameon=False, figsize=(10, 9), )
-		fig.subplots_adjust(wspace = .0,top = .89, bottom = .2, left = .12, right = .95)
+		fig.subplots_adjust(wspace = .0,top = .99, bottom = .15, left = .15, right = .99)
 		ax = fig.add_subplot(111)
 
 		cbar = plt.imshow(gene_pairs, interpolation='nearest', cmap = cm.nipy_spectral_r)
 		cb = plt.colorbar(cbar)
-		cb.set_label('N people with mutations on both genes')
+		cb.set_label('N people with mutations on both genes', fontsize = 14)
 
 
 		plt.xticks(range(len(gene_list)), gene_list, rotation='vertical', fontsize = 14,
