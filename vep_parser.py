@@ -117,7 +117,8 @@ class ReadData :
 class Results :
 	def patient_pairs(self, mutation_array) :
 		
-		n_runs = 100
+		tic = time.clock()
+		n_runs = params.n_runs
 		print mutation_array.shape
 		n_p = (mutation_array.shape)[0]
 		n_g = (mutation_array.shape)[1]
@@ -140,6 +141,8 @@ class Results :
 				pairs_overlap[run][pp] = np.sum(pair_array)
 
 #		print 'overlapping pairs', pairs_overlap		
+		toc = time.clock()
+		print toc - tic
 		
 		return pairs_overlap
 
