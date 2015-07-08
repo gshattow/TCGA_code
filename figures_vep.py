@@ -1,13 +1,13 @@
 import numpy as np
 import scipy
 import matplotlib
+matplotlib.use('Agg')
 import params
 import pylab
 import matplotlib.pyplot as plt
 from random import sample
 import matplotlib.colors as colors
 import matplotlib.cm as cm
-matplotlib.use('Agg')
 
 font = {'family':'serif',
 	'size':20	}
