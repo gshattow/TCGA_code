@@ -170,9 +170,9 @@ class Results :
 
 
 class WriteData :
-	def write_mutation_array(self, mutation_array, outfile) :
+	def write_mutation_array(self, mutation_array) :
 		file = 'mutation_array_' + params.chrom + '_' + params.impact + '.dat'
-		np.savetxt(outfile, mutation_array, fmt = '%i')
+		np.savetxt(file, mutation_array, fmt = '%i')
 		
 	def write_patients(self, patients_list) :
 		file = 'patients_' + params.chrom + '_' + params.impact + '.txt'
@@ -207,7 +207,7 @@ if __name__ == '__main__':
 	pairs_overlap = res.patient_pairs(mutation_array)
 	gene_pair_array = res.gene_pairs(mutation_array)
 
-	wt.write_mutation_array(mutation_array, outfile)
+	wt.write_mutation_array(mutation_array)
 	wt.write_patients(patients_list)
 	wt.write_genes(genes_list)
 	wt.write_pairs_overlap(pairs_overlap)
