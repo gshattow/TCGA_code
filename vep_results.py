@@ -13,15 +13,13 @@ from random import sample
 
 plot_dir = 'plots/'
 OutputFormat = '.png'
-datafile = ''
-outfile = ''
-ignore_consequence = ''
-impact = ''
+
+SIFT = "%03d" % int(params.sift*100)
 
 
 class ReadData :		
 	def read_mutation_array(self) :
-		file = 'mutation_array_' + params.chrom + '_' + params.impact + '.dat'
+		file = 'mutation_array_c' + params.chrom + '_s' + SIFT + '.dat'
 		mutation_array = np.loadtxt(file, unpack=True)
 		mutation_array = np.transpose(mutation_array)
 		
@@ -29,13 +27,13 @@ class ReadData :
 		
 
 	def read_patients(self) :
-		file = 'patients_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'patients_c' + params.chrom + '.txt'
 		patients_list = np.loadtxt(file, dtype=np.str)
 		
 		return patients_list
 
 	def read_genes(self) :
-		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'genes_c' + params.chrom + '.txt'
 		genes_list = np.loadtxt(file, dtype=np.str)
 		
 		return genes_list
@@ -100,24 +98,13 @@ class Results :
 
 
 class WriteData :
-	def write_mutation_array(self, mutation_array) :
-		file = 'mutation_array_' + params.chrom + '_' + params.impact + '.dat'
-		np.savetxt(file, mutation_array, fmt = '%i')
-		
-	def write_patients(self, patients_list) :
-		file = 'patients_' + params.chrom + '_' + params.impact + '.txt'
-		np.savetxt(file, patients_list, fmt = '%s')
-
-	def write_genes(self, genes_list) :
-		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
-		np.savetxt(file, genes_list, fmt = '%s')
 		
 	def write_pairs_overlap(self, pairs_overlap) :
-		file = 'patient_pairs_overlap_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'patient_pairs_overlap_c' + params.chrom + '_s' + SIFT + '.txt'
 		np.savetxt(file, pairs_overlap, fmt = '%i')
 
 	def write_gene_pairs(self, gene_pair_array) :
-		file = 'gene_pairs_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'gene_pairs_c' + params.chrom + '_s' + SIFT + '.txt'
 		np.savetxt(file, gene_pair_array, fmt = '%i')
 
 ############################################################
@@ -135,7 +122,7 @@ if __name__ == '__main__':
 	genes_list = rd.read_genes()
 	
 	pairs_overlap = res.patient_pairs(mutation_array)
-	gene_pair_array = res.gene_pairs(mutation_array)
-
 	wt.write_pairs_overlap(pairs_overlap)
+
+	gene_pair_array = res.gene_pairs(mutation_array)
 	wt.write_gene_pairs(gene_pair_array)
