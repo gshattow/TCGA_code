@@ -13,10 +13,8 @@ from random import sample
 
 plot_dir = 'plots/'
 OutputFormat = '.png'
-datafile = ''
-outfile = ''
-ignore_consequence = ''
-impact = ''
+
+SIFT = "%03d" % int(params.sift*100)
 
 
 class ReadData :		
@@ -51,7 +49,7 @@ class ReadData :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if set(['SYMBOL', 'IND']) <= set(extra) :
+				if set(['SYMBOL', 'IND', 'SIFT']) <= set(extra) :
 					if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
 						gene_index = extra.index('SYMBOL') + 1
 						patient_index = extra.index('IND')  + 1
@@ -62,13 +60,13 @@ class ReadData :
 		print toc - tic, 'seconds to read in file, ', \
 			float(len(genes_all))/(toc-tic), 'per second'		
 					
-		print len(genes_all), 'genes read'
-		print len(patients_all), 'patients read'
+		print len(genes_all), 'intragenic mutations read'
 
 		genes_all = list(set(genes_all))
 		patients_all = list(set(patients_all))
 		
-		print len(genes_all), 'intragenic mutations read'
+		print len(genes_all), 'unique genes'
+		print len(patients_all), 'unique patients'
 
 		
 #		print genes_all
@@ -100,7 +98,7 @@ class ReadData :
 						if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
 #							(extra[extra.index('IMPACT') + 1] == params.impact) :
 							sift = extra[extra.index('SIFT') + 1].replace('(', ' ').replace(')', ' ').split()
-							if float(sift[1]) < 0.05 :
+							if float(sift[1]) < params.sift :
 								gene_index = extra.index('SYMBOL') + 1
 								patient_index = extra.index('IND')  + 1
 								ii_p = patients_list.index(extra[patient_index])
@@ -118,15 +116,15 @@ class ReadData :
 
 class WriteData :
 	def write_mutation_array(self, mutation_array) :
-		file = 'mutation_array_' + params.chrom + '_' + params.impact + '.dat'
+		file = 'mutation_array_c' + params.chrom + '_s' + SIFT + '.dat'
 		np.savetxt(file, mutation_array, fmt = '%i')
 		
 	def write_patients(self, patients_list) :
-		file = 'patients_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'patients_c' + params.chrom + '.txt'
 		np.savetxt(file, patients_list, fmt = '%s')
 
 	def write_genes(self, genes_list) :
-		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
+		file = 'genes_c' + params.chrom + '.txt'
 		np.savetxt(file, genes_list, fmt = '%s')
 		
 
@@ -136,7 +134,6 @@ class WriteData :
 
 if __name__ == '__main__':
 	rd = ReadData()
-	res = Results()
 	wt = WriteData()
 
 	
