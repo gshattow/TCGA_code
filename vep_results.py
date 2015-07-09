@@ -58,7 +58,7 @@ class Results :
 		
 		list_p = np.linspace(0, n_p - 1, n_p)
 		for run in range(n_runs) :
-			randomized_list = list_p #sample(list_p, n_p)
+			randomized_list = sample(list_p, n_p)
 			for pq in range(n_pairs) :
 				array1 = b_mutation_array[randomized_list[2*pq]]
 				array2 = b_mutation_array[randomized_list[2*pq + 1]]
