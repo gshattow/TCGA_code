@@ -96,14 +96,16 @@ class ReadData :
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
 				if item[consequence_index] != params.ignore_consequence :
-					if set(['SYMBOL', 'IND']) <= set(extra) :
-						if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) & \
-							(extra[extra.index('IMPACT') + 1] == params.impact) :
-							gene_index = extra.index('SYMBOL') + 1
-							patient_index = extra.index('IND')  + 1
-							ii_p = patients_list.index(extra[patient_index])
-							ii_g = genes_list.index(extra[gene_index])
-							mutation_array[ii_p][ii_g] += 1
+					if set(['SYMBOL', 'IND', 'SIFT']) <= set(extra) :
+						if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
+#							(extra[extra.index('IMPACT') + 1] == params.impact) :
+							sift = extra[extra.index('SIFT') + 1].replace('(', ' ').replace(')', ' ').split()
+							if float(sift[1]) < 0.05 :
+								gene_index = extra.index('SYMBOL') + 1
+								patient_index = extra.index('IND')  + 1
+								ii_p = patients_list.index(extra[patient_index])
+								ii_g = genes_list.index(extra[gene_index])
+								mutation_array[ii_p][ii_g] += 1
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
@@ -112,63 +114,6 @@ class ReadData :
 #		print mutation_array
 		
 		return mutation_array
-
-class Results :
-	def patient_pairs(self, mutation_array) :
-		
-		tic = time.clock()
-		n_runs = params.n_runs
-		print mutation_array.shape
-		n_p = (mutation_array.shape)[0]
-		n_g = (mutation_array.shape)[1]
-		print n_p, n_g
-		
-		b_mutation_array = np.where(mutation_array > 0, 1., 0,)
-		print b_mutation_array
-		n_pairs = int(n_p/2)
-		print n_pairs, 'unique pairs of patients'
-		pairs_overlap = np.zeros((n_runs, n_pairs))
-		
-		list_p = np.linspace(0, n_p - 1, n_p)
-		for run in range(n_runs) :
-			randomized_list = sample(list_p, n_p)
-			for pp in range(n_pairs) :
-				array1 = b_mutation_array[randomized_list[2*pp]]
-				array2 = b_mutation_array[randomized_list[2*pp + 1]]
-				pair_array = array1 * array2
-				pair_array = pair_array[np.where(pair_array > 0, 1, 0)]
-				pairs_overlap[run][pp] = np.sum(pair_array)
-
-#		print 'overlapping pairs', pairs_overlap		
-		toc = time.clock()
-		print toc - tic
-		
-		return pairs_overlap
-
-	def gene_pairs(self, mutation_array) :
-
-		n_p = (mutation_array.shape)[0]
-		n_g = (mutation_array.shape)[1]
-
-		# populate an array with gene pairs for each patient
-		# i.e. if a patient has mutations in genes 1 and 3
-		# we add 1 to network[1,3]
-
-		tic = time.clock()
-		gene_pair_array = np.zeros((n_g,n_g))
-		print len(mutation_array)
-		for pp in range(n_p) :	
-			ww = np.where(mutation_array[pp] > 0)[0]	
-			for pair in itertools.combinations(ww, 2):
-				gene_pair_array[pair[0], pair[1]] += 1
-
-		toc = time.clock()
-		print toc - tic
-		
-		print gene_pair_array.shape
-		
-		print gene_pair_array
-		return gene_pair_array
 
 
 class WriteData :
@@ -184,13 +129,6 @@ class WriteData :
 		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
 		np.savetxt(file, genes_list, fmt = '%s')
 		
-	def write_pairs_overlap(self, pairs_overlap) :
-		file = 'patient_pairs_overlap_' + params.chrom + '_' + params.impact + '.txt'
-		np.savetxt(file, pairs_overlap, fmt = '%i')
-
-	def write_gene_pairs(self, gene_pair_array) :
-		file = 'gene_pairs_' + params.chrom + '_' + params.impact + '.txt'
-		np.savetxt(file, gene_pair_array, fmt = '%i')
 
 ############################################################
 
@@ -206,11 +144,7 @@ if __name__ == '__main__':
 	patients_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
 
-	pairs_overlap = res.patient_pairs(mutation_array)
-	gene_pair_array = res.gene_pairs(mutation_array)
 
 	wt.write_mutation_array(mutation_array)
 	wt.write_patients(patients_list)
 	wt.write_genes(genes_list)
-	wt.write_pairs_overlap(pairs_overlap)
-	wt.write_gene_pairs(gene_pair_array)

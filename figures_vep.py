@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from random import sample
 import matplotlib.colors as colors
 import matplotlib.cm as cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 font = {'family':'serif',
 	'size':14	}
@@ -19,15 +21,31 @@ chrom = params.chrom
 impact = params.impact
 
 
+class ReadData :
+	def read_pairs_overlap(self) :
+		file = 'patient_pairs_overlap_' + params.chrom + '_' + params.impact + '.txt'
+		pairs_overlap = np.loadtxt(file, unpack=True)
+		pairs_overlap = np.transpose(pairs_overlap)
+		
+		return pairs_overlap
+
+	def read_gene_pairs(self) :
+		file = 'gene_pairs_' + params.chrom + '_' + params.impact + '.txt'
+		gene_pairs = np.loadtxt(file, unpack=True)
+#		gene_pairs = np.transpose(gene_pairs)
+
+		return gene_pairs
+
+	def read_genes(self) :
+		file = 'genes_' + params.chrom + '_' + params.impact + '.txt'
+		genes_list = np.loadtxt(file, dtype=np.str)
+		
+		return genes_list
+
+
 class PlotData :		
 
-	def patient_overlap(self) :
-		pairs_overlap = []
-		patient_pair_file = 'patient_pairs_overlap_' + chrom + '_' + impact + '.txt'
-		for item in file(patient_pair_file) :
-			item = item.split()
-			pairs_overlap.append(map(float, item))
-		
+	def patient_overlap(self, pairs_overlap) :
 		
 		pairs_overlap = np.array(pairs_overlap)		
 		print pairs_overlap
@@ -72,39 +90,31 @@ class PlotData :
 		print 'Saved file to', outputFile
 		plt.close()
 
-	def gene_pairs(self) :
-		gene_pairs = []
-		for item in file('gene_pairs_' + chrom + '_' + impact + '.txt') :
-			item = item.split()
-			gene_pairs.append(map(float, item))
-	
-		gene_list = []
-		for item in file('genes_' + chrom + '_' + impact + '.txt') :
-			gene_list.append(item.split()[0])
+	def gene_pairs(self, gene_pairs) :
 
-		print gene_pairs
-		print gene_list
-
-		gene_pairs = np.transpose(gene_pairs)
 
 		fig = plt.figure(frameon=False, figsize=(10, 9), )
-		fig.subplots_adjust(wspace = .0,top = .99, bottom = .15, left = .15, right = .99)
+		fig.subplots_adjust(wspace = .0,top = .99, bottom = .15, left = .15, right = .9)
 		ax = fig.add_subplot(111)
 
-		cbar = plt.imshow(gene_pairs, interpolation='nearest', cmap = cm.nipy_spectral_r)
-		cb = plt.colorbar(cbar)
-		cb.set_label('N people with mutations on both genes', fontsize = 14)
-
-
-		plt.xticks(range(len(gene_list)), gene_list, rotation='vertical', fontsize = 14,
+		plt.xticks(range(len(gene_list)), gene_list, rotation='vertical', fontsize = 10,
 			family = 'sans-serif')
-		plt.yticks(range(len(gene_list)), gene_list, rotation='horizontal', fontsize = 14,
+		plt.yticks(range(len(gene_list)), gene_list, rotation='horizontal', fontsize = 10,
 			family = 'sans-serif')
 
 		text1 = str(len(gene_list)) + ' genes\n' + 'impact ' + \
 			impact + '\n chromosome ' + chrom
 		plt.text(len(gene_list)*.95, 0, text1, fontsize = 24, 
 			verticalalignment='top', horizontalalignment='right')
+
+#		fig.subplots_adjust(bottom=0.1, right=0.99, top=0.9)
+		cbar = plt.imshow(gene_pairs, interpolation='nearest', cmap = cm.nipy_spectral_r)
+#		fig.subplots_adjust(right=0.88)
+#		cax = fig.add_axes([0.9, 0.01, 0.15, 0.7])
+		divider = make_axes_locatable(ax)
+		cax = divider.append_axes("right", size="2%", pad=0.05)
+		cb = plt.colorbar(cbar, cax = cax)
+		cb.set_label('N people with mutations on both genes', fontsize = 14)
 
 		outputFile = 'plots/' + 'gene_pairs_' + chrom + '_' + impact + OutputFormat
 		plt.savefig(outputFile)  
@@ -114,8 +124,12 @@ class PlotData :
 
 
 if __name__ == '__main__':
-	pt = PlotData()
+	rd = ReadData()
+	pd = PlotData()
 
+	pairs_overlap = rd.read_pairs_overlap()
+	gene_pairs = rd.read_gene_pairs()
+	gene_list = rd.read_genes()
 	
-	pt.patient_overlap()
-	pt.gene_pairs()
+	pd.patient_overlap(pairs_overlap)
+	pd.gene_pairs(gene_pairs)
