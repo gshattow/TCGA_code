@@ -140,9 +140,7 @@ if __name__ == '__main__':
 	wt = WriteData()
 
 	
-	datafile = params.datafile + params.chrom
-	datafile = 'SIFT_' + datafile
-
+	datafile = params.datafile
 		
 	individuals_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, individuals_list, genes_list)
