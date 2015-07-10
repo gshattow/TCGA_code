@@ -63,7 +63,7 @@ class ReadData :
 		print toc - tic, 'seconds to read in file, ', \
 			float(len(genes_all))/(toc-tic), 'per second'		
 					
-		print len(genes_all), 'intragenic mutations read' 
+		print len(genes_all), 'intragenic mutations read'
 
 		genes_all = list(set(genes_all))
 		individuals_all = list(set(individuals_all))
