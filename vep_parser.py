@@ -9,6 +9,8 @@ import itertools
 import time
 import params
 from random import sample
+import os
+import subprocess
 
 
 plot_dir = 'plots/'
@@ -17,8 +19,8 @@ OutputFormat = '.png'
 SIFT = "%03d" % int(params.sift*100)
 
 
-class ReadData :		
-		
+class ReadData :			
+	
 	def parse_vep_file(self, datafile) :
 
 		genes_all = []
@@ -33,6 +35,7 @@ class ReadData :
 		individuals_all = []
 		chromosomes = []
 		
+		
 		ii = 0
 		tic = time.clock()
 		for item in file(datafile) :
@@ -42,7 +45,7 @@ class ReadData :
 			elif item.startswith('#') :
 				print 'line number', ii, 'has the index names'
 				item = item.split()
-				consequence_index = item.index('Consequence')
+#				consequence_index = item.index('Consequence')
 				location_index = item.index('Location')
 				extra_index = item.index('Extra')
 			else :
@@ -86,24 +89,24 @@ class ReadData :
 				continue
 			elif item.startswith('#') :
 				item = item.split()
-				consequence_index = item.index('Consequence')
+#				consequence_index = item.index('Consequence')
 				location_index = item.index('Location')
 				extra_index = item.index('Extra')
 			else :
 				item = item.split()
 				loc = item[location_index].split(':')
 				extra = item[extra_index].replace(';',' ').replace('=', ' ').split()
-				if item[consequence_index] != params.ignore_consequence :
-					if set(['SYMBOL', 'IND', 'SIFT']) <= set(extra) :
-						if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
+#				if item[consequence_index] != params.ignore_consequence :
+				if set(['SYMBOL', 'IND', 'SIFT']) <= set(extra) :
+					if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
 #							(extra[extra.index('IMPACT') + 1] == params.impact) :
-							sift = extra[extra.index('SIFT') + 1].replace('(', ' ').replace(')', ' ').split()
-							if float(sift[1]) < params.sift :
-								gene_index = extra.index('SYMBOL') + 1
-								individual_index = extra.index('IND')  + 1
-								ii_p = individuals_list.index(extra[individual_index])
-								ii_g = genes_list.index(extra[gene_index])
-								mutation_array[ii_p][ii_g] += 1
+						sift = extra[extra.index('SIFT') + 1].replace('(', ' ').replace(')', ' ').split()
+						if float(sift[1]) < params.sift :
+							gene_index = extra.index('SYMBOL') + 1
+							individual_index = extra.index('IND')  + 1
+							ii_p = individuals_list.index(extra[individual_index])
+							ii_g = genes_list.index(extra[gene_index])
+							mutation_array[ii_p][ii_g] += 1
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
@@ -138,6 +141,9 @@ if __name__ == '__main__':
 
 	
 	datafile = params.datafile + params.chrom
+	datafile = 'SIFT_' + datafile
+
+		
 	individuals_list, genes_list = rd.parse_vep_file(datafile)
 	mutation_array = rd.sort_vep_file(datafile, individuals_list, genes_list)
 
