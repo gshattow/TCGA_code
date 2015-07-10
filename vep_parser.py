@@ -22,15 +22,15 @@ class ReadData :
 	def parse_vep_file(self, datafile) :
 
 		genes_all = []
-		patients_all = []
+		individuals_all = []
 
 		location_index = 0
 		extra_index = 0
 		gene_index = 0
-		patient_index = 0
+		individual_index = 0
 		consequence_index = 0
 		genes_all = []
-		patients_all = []
+		individuals_all = []
 		chromosomes = []
 		
 		ii = 0
@@ -52,9 +52,9 @@ class ReadData :
 				if set(['SYMBOL', 'IND', 'SIFT']) <= set(extra) :
 					if (extra[extra.index('SYMBOL_SOURCE') + 1] == params.catalogue) :
 						gene_index = extra.index('SYMBOL') + 1
-						patient_index = extra.index('IND')  + 1
+						individual_index = extra.index('IND')  + 1
 						genes_all.append(extra[gene_index])
-						patients_all.append(extra[patient_index])
+						individuals_all.append(extra[individual_index])
 
 		toc = time.clock()	
 		print toc - tic, 'seconds to read in file, ', \
@@ -63,21 +63,21 @@ class ReadData :
 		print len(genes_all), 'intragenic mutations read'
 
 		genes_all = list(set(genes_all))
-		patients_all = list(set(patients_all))
+		individuals_all = list(set(individuals_all))
 		
 		print len(genes_all), 'unique genes'
-		print len(patients_all), 'unique patients'
+		print len(individuals_all), 'unique individuals'
 
 		
 #		print genes_all
-#		print patients_all
+#		print individuals_all
 		
-		return patients_all, genes_all
+		return individuals_all, genes_all
 		
-	def sort_vep_file(self, datafile, patients_list, genes_list) :
+	def sort_vep_file(self, datafile, individuals_list, genes_list) :
 		
 		n_g = len(genes_list)
-		n_p = len(patients_list)
+		n_p = len(individuals_list)
 		mutation_array = np.zeros((n_p, n_g))
 		
 		tic = time.clock()
@@ -100,8 +100,8 @@ class ReadData :
 							sift = extra[extra.index('SIFT') + 1].replace('(', ' ').replace(')', ' ').split()
 							if float(sift[1]) < params.sift :
 								gene_index = extra.index('SYMBOL') + 1
-								patient_index = extra.index('IND')  + 1
-								ii_p = patients_list.index(extra[patient_index])
+								individual_index = extra.index('IND')  + 1
+								ii_p = individuals_list.index(extra[individual_index])
 								ii_g = genes_list.index(extra[gene_index])
 								mutation_array[ii_p][ii_g] += 1
 
@@ -119,9 +119,9 @@ class WriteData :
 		file = 'mutation_array_c' + params.chrom + '_s' + SIFT + '.dat'
 		np.savetxt(file, mutation_array, fmt = '%i')
 		
-	def write_patients(self, patients_list) :
-		file = 'patients_c' + params.chrom + '.txt'
-		np.savetxt(file, patients_list, fmt = '%s')
+	def write_individuals(self, individuals_list) :
+		file = 'individuals_c' + params.chrom + '.txt'
+		np.savetxt(file, individuals_list, fmt = '%s')
 
 	def write_genes(self, genes_list) :
 		file = 'genes_c' + params.chrom + '.txt'
@@ -138,10 +138,10 @@ if __name__ == '__main__':
 
 	
 	datafile = params.datafile + params.chrom
-	patients_list, genes_list = rd.parse_vep_file(datafile)
-	mutation_array = rd.sort_vep_file(datafile, patients_list, genes_list)
+	individuals_list, genes_list = rd.parse_vep_file(datafile)
+	mutation_array = rd.sort_vep_file(datafile, individuals_list, genes_list)
 
 
 	wt.write_mutation_array(mutation_array)
-	wt.write_patients(patients_list)
+	wt.write_individuals(individuals_list)
 	wt.write_genes(genes_list)

@@ -26,11 +26,11 @@ class ReadData :
 		return mutation_array
 		
 
-	def read_patients(self) :
-		file = 'patients_c' + params.chrom + '.txt'
-		patients_list = np.loadtxt(file, dtype=np.str)
+	def read_individuals(self) :
+		file = 'individuals_c' + params.chrom + '.txt'
+		individuals_list = np.loadtxt(file, dtype=np.str)
 		
-		return patients_list
+		return individuals_list
 
 	def read_genes(self) :
 		file = 'genes_c' + params.chrom + '.txt'
@@ -40,7 +40,7 @@ class ReadData :
 			
 
 class Results :
-	def patient_pairs(self, mutation_array) :
+	def individual_pairs(self, mutation_array) :
 		
 		tic = time.clock()
 		print mutation_array.shape
@@ -51,7 +51,7 @@ class Results :
 		b_mutation_array = np.where(mutation_array > 0, 1., 0,)
 		print b_mutation_array
 		n_pairs = int(n_p/2)
-		print n_pairs, 'unique pairs of patients'
+		print n_pairs, 'unique pairs of individuals'
 		n_runs = params.n_runs
 		pairs_overlap = np.zeros((n_runs, n_pairs))
 
@@ -67,7 +67,7 @@ class Results :
 
 #		print 'overlapping pairs', pairs_overlap		
 		toc = time.clock()
-		print toc - tic, 'seconds to pair patients'
+		print toc - tic, 'seconds to pair individuals'
 		
 		return pairs_overlap
 
@@ -76,8 +76,8 @@ class Results :
 		n_p = (mutation_array.shape)[0]
 		n_g = (mutation_array.shape)[1]
 
-		# populate an array with gene pairs for each patient
-		# i.e. if a patient has mutations in genes 1 and 3
+		# populate an array with gene pairs for each individual
+		# i.e. if a individual has mutations in genes 1 and 3
 		# we add 1 to network[1,3]
 
 		tic = time.clock()
@@ -100,7 +100,7 @@ class Results :
 class WriteData :
 		
 	def write_pairs_overlap(self, pairs_overlap) :
-		file = 'patient_pairs_overlap_c' + params.chrom + '_s' + SIFT + '.txt'
+		file = 'individual_pairs_overlap_c' + params.chrom + '_s' + SIFT + '.txt'
 		np.savetxt(file, pairs_overlap, fmt = '%i')
 
 	def write_gene_pairs(self, gene_pair_array) :
@@ -118,10 +118,10 @@ if __name__ == '__main__':
 
 	
 	mutation_array = rd.read_mutation_array()
-	patients_list = rd.read_patients()
+	individuals_list = rd.read_individuals()
 	genes_list = rd.read_genes()
 	
-	pairs_overlap = res.patient_pairs(mutation_array)
+	pairs_overlap = res.individual_pairs(mutation_array)
 	wt.write_pairs_overlap(pairs_overlap)
 
 	gene_pair_array = res.gene_pairs(mutation_array)

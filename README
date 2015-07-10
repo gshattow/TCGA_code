@@ -1,17 +1,78 @@
-You should have a file in the directory where you are running vep_parser.py and figures_vep.py called params.py.
+Welcome to our TCGA code repository! With this code you can parse and analyze 
+the output of the VEP (Variant Effect Predictor by ENSEMBL). The scripts included
+here are:
+
+vep_parser.py : parses the output of the VEP
+vep_results.py : analyzes the parsed output
+figures.vep.py : plots the output of vep_results.py
+params.py : a parameter file not meant to be run
 
 
-It should look like this:
+The parameter file goes as follows:
+
 
 params.py
 
 ## chrom = chromosome
 ## datafile = input file name prefix
 ## ignore_consequence = consequence to ignore. Currently takes only one value
+## sift = maximum sift score allowed, this also blocks out all mutations that do not
+##			have sift scores
 ## catalogue = catalogue which gene names are taken from
+## n_runs = number of times the unique pairs of individuals are run
 
 chrom = '1'
-datafile = 'output_'
+datafile = 'VEP_output_'
 ignore_consequence = 'downstream_gene_variant'
-impact = 'MODIFIER'
+sift = 0.05
 catalogue = 'HGNC'
+n_runs = 100
+
+
+
+
+vep_parser.py
+
+input: from params.py
+output : mutation_array_cCHROMOSOME_sSIFT*100.dat
+		 individuals_cCHROMOSOME.txt
+		 genes_cCHROMOSOME.txt
+
+This script is designed to take output from the VEP and put it into a readable
+array of n_individuals x n_genes. It reads in the file line by line, saving the
+human IDs and gene names. Then it creates the array in the correct size. It then
+re-reads the file, populating the array. It then prints the array to file.
+
+
+vep_results.py
+
+input :  mutation_array_cCHROMOSOME_sSIFT*100.dat
+		 individuals_cCHROMOSOME.txt
+		 genes_cCHROMOSOME.txt
+
+output : individual_pairs_overlap_cCHROMOSOME_sSIFT*100.txt
+		 gene_pairs_overlap_cCHROMOSOME_sSIFT*100.txt
+		 
+This script reads in the output from vep_parser.py and runs it through two analysis
+functions to output recurring genes in pairs of individuals and recurring pairs 
+of genes. The input files individuals_c* and genes_c* are not necessary at this
+moment, but might be used to limit the scope of future analysis, such as by 
+population or to another smaller set of people.
+
+
+vep_figures.py
+
+input : individual_pairs_overlap_cCHROMOSOME_sSIFT*100.txt
+		gene_pairs_overlap_cCHROMOSOME_sSIFT*100.txt
+		genes_cCHROMOSOME.txt
+
+output : plots/pair_distribution_cCHROMOSOME_sSIFT*100.png
+		 plots/gene_pairs_cCHROMOSOME_sSIFT*100.png
+
+
+This script plots the output of vep_results.py. It plots the overlapping genes
+in unique pairs of individuals as a set of n_runs histograms. The colours are
+the automatic python colours, but are not important on their own. The second
+plot is a temperature map of how frequently pairs of genes occur in the sample set.
+A gray square indicates that the pair of genes does not occur in the sample, 
+whereas a black square shows that all of the people have these two genes mutated.
