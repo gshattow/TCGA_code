@@ -7,21 +7,21 @@ usage()
 cat << EOF
 usage: $0 options
 
-This script run the test1 or test2 over a machine.
+This script runs the VEP analysis suite.
 
 OPTIONS:
    -h		Show this message
-   -d		directory
-   -i		infile
-   -c		chromosome
-   -s		sift
-   -l		catalogue
-   -r		n_runs
+   -d		directory (e.g. ../VEP_output/)
+   -i		infile prefix (e.g. VEP_output_)
+   -c		chromosome (e.g. 3)
+   -s		maximum sift score (e.g. 0.05)
+   -l		catalogue of gene names (e.g. HGNC)
+   -r		n_runs for individual pairings (e.g. 100)
 EOF
 }
 
-DIR=./
-INFILE=output_
+DIR=../VEP_output/
+INFILE=VEP_output_
 CHROMOSOME=''
 SIFTSCORE=0.05
 CATALOGUE=HGNC
@@ -61,9 +61,11 @@ done
 
 time for i in 1;
 do
+	echo $DIR, $INFILE
 	datafile=$DIR$INFILE$CHROMOSOME
 	outfile=$INFILE$CHROMOSOME'_SIFT'
-	echo "moving "$datafile" to "$outfile
+	echo "moving mutations with SIFT scores < "$SIFTSCORE
+	echo "from "$datafile" to ./"$outfile
 	grep -m 1 '^\#[A-Z]' $datafile > $outfile
 	grep SIFT $datafile >> $outfile
 	
